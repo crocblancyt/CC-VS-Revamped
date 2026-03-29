@@ -14,18 +14,12 @@ import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.slf4j.Logger;
-import org.valkyrienskies.core.impl.hooks.VSEvents;
 
 import net.minecraftforge.fml.common.Mod;
-
 import net.minecraftforge.eventbus.api.IEventBus;
-
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-
-import net.minecraft.client.model.geom.ModelLayerLocation;
-
 import net.croc.cc_vs_r.apis.ShipAPI;
 
 import static net.croc.cc_vs_r.Main.MOD_ID;
@@ -43,30 +37,6 @@ public class Main {
         MinecraftForge.EVENT_BUS.register(this);
         RegistryConfigs.register(modLoadingContext);
 
-        //LifecycleEvent.SERVER_STARTED.register(Main::init$lambda$0);
         ComputerCraftAPI.registerAPIFactory(ShipAPI::new);
-        //VSEvents.INSTANCE.getShipLoadEvent().on(Main::onShipLoaded);
-        //VSEvents.INSTANCE.getTickEndEvent().on(Main::onTick);
     }
-
-    /*private static final void init$lambda$0(MinecraftServer it) {
-        Intrinsics.checkNotNullExpressionValue(ServerContext.get(it), "get(...)");
-        INSTANCE.setContext(ServerContext.get(it));
-    }*/
-
-    /*private static final void onShipLoaded(VSEvents.ShipLoadEvent event) {
-        //event.getShip().setAttachment(PhysTickEventHandler.class, null);
-    }*/
-
-    /* static final void onTick(VSEvents.TickEndEvent event) {
-        Iterable $this$forEach$iv = (Iterable)event.getWorld().getLoadedShips();
-        int $i$f$forEach = 0;
-        Iterator iterator = $this$forEach$iv.iterator();
-        if (iterator.hasNext()) {
-            Object element$iv = iterator.next();
-            ShipObjectServer ship = (ShipObjectServer)element$iv;
-            int $i$a$-forEach-CCVSMod$init$4$1 = 0;
-            PhysicsTicksEventHandler.Companion.getOrCreateControl((ServerShip)ship).resetData();
-        }
-    }*/
 }
