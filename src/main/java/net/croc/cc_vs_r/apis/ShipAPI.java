@@ -15,9 +15,10 @@ import org.joml.Matrix4dc;
 import org.joml.Vector3d;
 import org.joml.Vector3dc;
 import org.joml.Vector4d;
-import org.joml.primitives.AABBdc;
+import org.joml.primitives.AABBd;
+import org.joml.primitives.AABBi;
 import org.joml.primitives.AABBic;
-import org.valkyrienskies.core.api.ships.LoadedServerShip;
+import org.valkyrienskies.core.api.ships.ServerShip;
 import org.valkyrienskies.mod.common.VSGameUtilsKt;
 
 import javax.annotation.Nullable;
@@ -69,8 +70,8 @@ public class ShipAPI implements ILuaAPI {
     */
 
     @NotNull
-    protected final LoadedServerShip getShip() throws LuaException{
-        LoadedServerShip ship = VSGameUtilsKt.getShipObjectManagingPos(this.system.getLevel(), this.system.getPosition());
+    protected final ServerShip getShip() throws LuaException{
+        ServerShip ship = VSGameUtilsKt.getShipObjectManagingPos(this.system.getLevel(), this.system.getPosition());
         if (ship == null) { throw new LuaException("This computer is not on a Ship!"); }
         return ship;
     }

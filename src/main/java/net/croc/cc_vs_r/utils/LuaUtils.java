@@ -38,12 +38,12 @@ public class LuaUtils {
 
     public static Map<String, ?> toLua(AABBic area) {
         Map<String, Object> luaMap = new HashMap<>();
-        luaMap.put("min_x", area.minX());
-        luaMap.put("min_y", area.minY());
-        luaMap.put("min_z", area.minZ());
-        luaMap.put("max_x", area.maxX());
-        luaMap.put("max_y", area.maxY());
-        luaMap.put("max_z", area.maxZ());
+        luaMap.put("min_x", (double) area.minX());
+        luaMap.put("min_y", (double) area.minY());
+        luaMap.put("min_z", (double) area.minZ());
+        luaMap.put("max_x", (double) area.maxX());
+        luaMap.put("max_y", (double) area.maxY());
+        luaMap.put("max_z", (double) area.maxZ());
         return luaMap;
     };
 
