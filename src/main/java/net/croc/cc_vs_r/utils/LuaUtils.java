@@ -1,14 +1,11 @@
 package net.croc.cc_vs_r.utils;
 
+import java.util.*;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Quaterniondc;
-import org.joml.Vector3d;
 import org.joml.Vector3dc;
 import org.joml.primitives.AABBic;
-
-import java.util.HashMap;
-import java.util.Map;
 
 public class LuaUtils {
     public static Map<String, Double> toLua(Vec3 vec) {
@@ -17,7 +14,7 @@ public class LuaUtils {
         luaMap.put("y", vec.y());
         luaMap.put("z", vec.z());
         return luaMap;
-    };
+    }
 
     public static Map<String, Double> toLua(Vector3dc vec) {
         Map<String, Double> luaMap = new HashMap<>();
@@ -45,7 +42,7 @@ public class LuaUtils {
         luaMap.put("max_y", area.maxY());
         luaMap.put("max_z", area.maxZ());
         return luaMap;
-    };
+    }
 
     public static Map<String, ?> toLua(BlockPos vec) {
         Map<String, Object> luaMap = new HashMap<>();
@@ -53,5 +50,5 @@ public class LuaUtils {
         luaMap.put("y", vec.getY());
         luaMap.put("z", vec.getZ());
         return luaMap;
-    };
+    }
 }

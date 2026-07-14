@@ -1,77 +1,66 @@
 package net.croc.cc_vs_r.apis;
 
 import dan200.computercraft.api.lua.*;
-import dan200.computercraft.core.computer.Computer;
-import dan200.computercraft.shared.computer.blocks.ComputerBlock;
-import kotlin.collections.CollectionsKt;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import javax.annotation.Nullable;
+
+import net.croc.cc_vs_r.utils.PhysicsTicksHandle;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Vec3i;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.HorizontalDirectionalBlock;
-import net.minecraft.world.level.block.state.BlockBehaviour;
-import net.minecraft.world.phys.AABB;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Matrix4dc;
 import org.joml.Vector3d;
-import org.joml.Vector3dc;
 import org.joml.Vector4d;
-import org.joml.primitives.AABBdc;
 import org.joml.primitives.AABBic;
-import org.valkyrienskies.core.api.ships.LoadedServerShip;
+import org.valkyrienskies.core.api.ships.ServerShip;
 import org.valkyrienskies.mod.common.VSGameUtilsKt;
 
-import javax.annotation.Nullable;
-import java.util.*;
-
-import net.croc.cc_vs_r.utils.LuaUtils;
+import static net.croc.cc_vs_r.utils.LuaUtils.toLua;
 
 public class ShipAPI implements ILuaAPI {
-    @NotNull
-    private final IComputerSystem system;
+    private IComputerSystem system;
 
-    public ShipAPI(@NotNull IComputerSystem system) {
+    private ServerShip ship;
+
+    public ShipAPI(IComputerSystem system) {
         this.system = system;
+    }
+
+    public ShipAPI(ServerShip ship) {
+        this.ship = ship;
     }
 
     @Nullable
     public String[] getNames() {
-        String[] arrayOfString = new String[1];
-        arrayOfString[0] = "ship";
-        return arrayOfString;
+        return new String[]{"ship"};
     }
 
-    /*
+    @Override
     public void startup() {
+        if (this.system == null) return;
         try {
-            if (PlatformUtils.exposePhysTick())
-                PhysicsTicksEventHandler.Companion.getOrCreateControl((ServerShip)getShip());
+            PhysicsTicksHandle.getOrCreate(getShip()).subscribe(this.system);
         } catch (LuaException luaException) {}
-        super.startup();
     }
 
-    public void update() {
-        try {
-            if (PlatformUtils.exposePhysTick()) {
-                LuaPhysShip[] data = PhysicsTicksEventHandler.Companion.getOrCreateControl((ServerShip)getShip()).getData();
-                this.system.queueEvent("physics_ticks", Arrays.copyOf((Object[])data, data.length));
-            }
-        } catch (LuaException luaException) {}
-        super.update();
-    }
-
+    @Override
     public void shutdown() {
+        if (this.system == null) return;
         try {
-            if (PlatformUtils.exposePhysTick())
-                PhysicsTicksEventHandler.Companion.getOrCreateControl((ServerShip)getShip());
+            PhysicsTicksHandle.getOrCreate(getShip()).unsubscribe(this.system);
         } catch (LuaException luaException) {}
-        super.shutdown();
     }
-    */
 
     @NotNull
-    protected final LoadedServerShip getShip() throws LuaException{
-        LoadedServerShip ship = VSGameUtilsKt.getShipObjectManagingPos(this.system.getLevel(), this.system.getPosition());
-        if (ship == null) { throw new LuaException("This computer is not on a Ship!"); }
+    protected final ServerShip getShip() throws LuaException {
+        if (ship != null) return ship;
+        ServerShip ship = VSGameUtilsKt.getShipObjectManagingPos(this.system.getLevel(), this.system.getPosition());
+        if (ship == null)
+            throw new LuaException("This computer is not on a Ship!");
         return ship;
     }
 
@@ -79,7 +68,7 @@ public class ShipAPI implements ILuaAPI {
     @NotNull
     public final List<List<Double>> getRotationMatrix() throws LuaException {
         Matrix4dc transform = getShip().getTransform().getShipToWorld();
-        List<List<Double>> matrix = new ArrayList();
+        List<List<Double>> matrix = new ArrayList<>();
         for (int i = 0; i < 4; i++) {
             Vector4d row = transform.getRow(i, new Vector4d());
             List<Double> arrayOfDouble = new ArrayList<>();
@@ -95,13 +84,13 @@ public class ShipAPI implements ILuaAPI {
     @LuaFunction
     public final double getRoll() throws LuaException {
         List<List<Double>> rotMatrix = getRotationMatrix();
-        return Math.atan2(rotMatrix.get(1).get(0), rotMatrix.get(1).get(1));
+        return Math.atan2(rotMatrix.get(1).get(0),rotMatrix.get(1).get(1));
     }
 
     @LuaFunction
     public final double getYaw() throws LuaException {
         List<List<Double>> rotMatrix = getRotationMatrix();
-        return Math.atan2(-rotMatrix.get(0).get(2), rotMatrix.get(2).get(2));
+        return Math.atan2(-rotMatrix.get(0).get(2),rotMatrix.get(2).get(2));
     }
 
     @LuaFunction
@@ -111,27 +100,27 @@ public class ShipAPI implements ILuaAPI {
 
     @LuaFunction
     public final Map<String, Double> getEulerAnglesXYZ() throws LuaException {
-        return LuaUtils.toLua(getShip().getTransform().getShipToWorldRotation().getEulerAnglesXYZ(new Vector3d()));
+        return toLua(getShip().getTransform().getShipToWorldRotation().getEulerAnglesXYZ(new Vector3d()));
     }
 
     @LuaFunction
     public final Map<String, Double> getEulerAnglesZYX() throws LuaException {
-        return LuaUtils.toLua(getShip().getTransform().getShipToWorldRotation().getEulerAnglesZYX(new Vector3d()));
+        return toLua(getShip().getTransform().getShipToWorldRotation().getEulerAnglesZYX(new Vector3d()));
     }
 
     @LuaFunction
     public final Map<String, Double> getEulerAnglesZXY() throws LuaException {
-        return LuaUtils.toLua(getShip().getTransform().getShipToWorldRotation().getEulerAnglesZXY(new Vector3d()));
+        return toLua(getShip().getTransform().getShipToWorldRotation().getEulerAnglesZXY(new Vector3d()));
     }
 
     @LuaFunction
     public final Map<String, Double> getEulerAnglesYXZ() throws LuaException {
-        return LuaUtils.toLua(getShip().getTransform().getShipToWorldRotation().getEulerAnglesYXZ(new Vector3d()));
+        return toLua(getShip().getTransform().getShipToWorldRotation().getEulerAnglesYXZ(new Vector3d()));
     }
 
     @LuaFunction
     public final Map<String, Double> getQuaternion() throws LuaException {
-        return LuaUtils.toLua(getShip().getTransform().getShipToWorldRotation());
+        return toLua(getShip().getTransform().getShipToWorldRotation());
     }
 
     @LuaFunction
@@ -151,27 +140,27 @@ public class ShipAPI implements ILuaAPI {
 
     @LuaFunction
     public final Map<String, Double> getOmega() throws LuaException {
-        return LuaUtils.toLua(getShip().getOmega());
+        return toLua(getShip().getOmega());
     }
 
     @LuaFunction
     public final Map<String, Double> getVelocity() throws LuaException {
-        return LuaUtils.toLua(getShip().getVelocity());
+        return toLua(getShip().getVelocity());
     }
 
     @LuaFunction
     public final Map<String, Double> getWorldspacePosition() throws LuaException {
-        return LuaUtils.toLua(getShip().getTransform().getPositionInWorld());
+        return toLua(getShip().getTransform().getPositionInWorld());
     }
 
     @LuaFunction
     public final Map<String, Double> getShipyardPosition() throws LuaException {
-        return LuaUtils.toLua(getShip().getTransform().getPositionInShip());
+        return toLua(getShip().getTransform().getPositionInShip());
     }
 
     @LuaFunction
     public final Map<String, ?> getComputerPosition() throws LuaException {
-        return LuaUtils.toLua(this.system.getPosition());
+        return toLua(this.system.getPosition());
     }
 
     @LuaFunction
@@ -183,23 +172,29 @@ public class ShipAPI implements ILuaAPI {
 
     @LuaFunction
     public final Map<String, Double> getScale() throws LuaException {
-        return LuaUtils.toLua(getShip().getTransform().getShipToWorldScaling());
+        return toLua(getShip().getTransform().getShipToWorldScaling());
     }
 
     @LuaFunction
     public final Map<String, ?> getShipyardAABB() throws LuaException {
         AABBic area = getShip().getShipAABB();
-        if (area == null) { throw new LuaException("No shipyard AABB"); }
-        return LuaUtils.toLua(area);
+        if (area == null)
+            throw new LuaException("No shipyard AABB");
+        return toLua(area);
+    }
+
+    @LuaFunction
+    public final Map<String, ?> getWorldspaceAABB() throws LuaException {
+        return toLua((AABBic) getShip().getWorldAABB());
     }
 
     @LuaFunction
     public final List<List<Double>> getTransformationMatrix() throws LuaException {
         Matrix4dc transform = getShip().getTransform().getShipToWorld();
-        List<List<Double>> matrix = new ArrayList();
+        List<List<Double>> matrix = new ArrayList<>();
         for (int i = 0; i < 4; i++) {
             Vector4d row = transform.getRow(i, new Vector4d());
-            List<Double> arrayOfDouble = new ArrayList();
+            List<Double> arrayOfDouble = new ArrayList<>();
             arrayOfDouble.add(row.x);
             arrayOfDouble.add(row.y);
             arrayOfDouble.add(row.z);
@@ -209,14 +204,29 @@ public class ShipAPI implements ILuaAPI {
         return matrix;
     }
 
-    public final Vector3dc toVector(Map arg) throws LuaException {
-        if (arg == null) { throw new LuaException("Invalid Argument! Expects either a vector or a table with x, y, and z keys!"); }
-
-        return new Vector3d(
-                (Double) arg.get("x"),
-                (Double) arg.get("y"),
-                (Double) arg.get("z")
-        );
+    @LuaFunction
+    public final Map<String, ?> transformPositionToWorld(double x, double y, double z) throws LuaException {
+        return toLua(getShip().getShipToWorld().transformPosition(new Vector3d(x, y, z)));
     }
 
+    @LuaFunction
+    public final Map<String, ?> transformDirectionToWorld(double x, double y, double z) throws LuaException {
+        return toLua(getShip().getShipToWorld().transformDirection(new Vector3d(x, y, z)));
+    }
+
+    @LuaFunction
+    public final Map<String, ?> transformPositionToShip(double x, double y, double z) throws LuaException {
+        return toLua(getShip().getWorldToShip().transformPosition(new Vector3d(x, y, z)));
+    }
+
+    @LuaFunction
+    public final Map<String, ?> transformDirectionToShip(double x, double y, double z) throws LuaException {
+        return toLua(getShip().getWorldToShip().transformDirection(new Vector3d(x, y, z)));
+    }
+
+    @LuaFunction
+    public final Map<String, ?> getShipyardOmega() throws LuaException {
+        ServerShip ship = getShip();
+        return toLua(ship.getShipToWorld().transformDirection((Vector3d) ship.getVelocity()));
+    }
 }

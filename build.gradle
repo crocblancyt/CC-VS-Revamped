@@ -159,6 +159,9 @@ repositories {
         url "https://maven.architectury.dev/"
     }
 
+    flatDir {
+        dirs 'libs'
+    }
 }
 
 dependencies {
@@ -228,6 +231,8 @@ tasks.named('jar', Jar).configure {
                 'Implementation-Timestamp': new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
         ])
     }
+
+    archiveFileName = "cc_vs_r-${mc_version}-forge-${mod_version}-indev.jar"
 
     // This is the preferred method to reobfuscate your jar file
     finalizedBy 'reobfJar'
