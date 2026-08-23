@@ -55,7 +55,7 @@ public class VSGameUtilsAPI implements ILuaAPI {
         ArrayList<ShipAPI> result = new ArrayList<>();
 
         for (Ship ship : VSGameUtilsKt.getAllShips(this.system.getLevel())) {
-            result.add(new ShipAPI((ServerShip) ship));
+            result.add(new ShipAPI((ServerShip) ship, system));
         }
 
         return result;
@@ -66,7 +66,7 @@ public class VSGameUtilsAPI implements ILuaAPI {
         assertIsCommand();
         ServerShip ship = VSGameUtilsKt.getShipManagingPos(this.system.getLevel(), new BlockPos((int) x, (int) y, (int) z));
         if (ship == null) return null;
-        return new ShipAPI(ship);
+        return new ShipAPI(ship, system);
     }
 
     @LuaFunction
@@ -83,7 +83,7 @@ public class VSGameUtilsAPI implements ILuaAPI {
 
         ServerShip ship = (ServerShip) VSGameUtilsKt.getShipManaging(level.getEntity(uuid));
         if (ship == null) return null;
-        return new ShipAPI(ship);
+        return new ShipAPI(ship, system);
     }
 
     @LuaFunction
@@ -94,7 +94,7 @@ public class VSGameUtilsAPI implements ILuaAPI {
         ArrayList<ShipAPI> result = new ArrayList<>();
 
         VSGameUtilsKt.getShipsIntersecting(this.system.getLevel(), area).forEach((ship -> {
-            result.add(new ShipAPI((ServerShip) ship));
+            result.add(new ShipAPI((ServerShip) ship, system));
         }));
 
         return result;
@@ -102,12 +102,12 @@ public class VSGameUtilsAPI implements ILuaAPI {
 
     @LuaFunction
     public final ShipAPI getShipById(long shipId) throws LuaException {
-        ServerShip ship =  getShipFromId(shipId);
-        return new ShipAPI(ship);
+        ServerShip ship = getShipFromId(shipId);
+        return new ShipAPI(ship, system);
     }
 
-    public final ServerShip getShipFromId(long shipId) throws LuaException {
-        ServerLevel level = this.system.getLevel();
+    public ServerShip getShipFromId(long shipId) throws LuaException {
+        ServerLevel level = system.getLevel();
         ServerShipWorld world = VSGameUtilsKt.getShipObjectWorld(level);
 
         ServerShip ship = world.getAllShips().getById(shipId);
@@ -169,7 +169,7 @@ public class VSGameUtilsAPI implements ILuaAPI {
         if (structure.isEmpty()) throw new LuaException("Area contains no blocks");
 
         ServerShip ship = ShipAssemblyKt.createNewShipWithBlocks(new BlockPos((int) x1, (int) y1, (int) z1), structure, level);
-        return new ShipAPI(ship);
+        return new ShipAPI(ship, system);
     }
 
     @LuaFunction

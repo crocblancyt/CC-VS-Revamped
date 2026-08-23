@@ -22,16 +22,20 @@ import org.valkyrienskies.mod.common.VSGameUtilsKt;
 import static net.croc.cc_vs_r.utils.LuaUtils.toLua;
 
 public class ShipAPI implements ILuaAPI {
-    private IComputerSystem system;
+    private @Nullable IComputerSystem ship_system;
+
+    private final IComputerSystem host_system;
 
     private ServerShip ship;
 
     public ShipAPI(IComputerSystem system) {
-        this.system = system;
+        this.ship_system = system;
+        this.host_system = system;
     }
 
-    public ShipAPI(ServerShip ship) {
+    public ShipAPI(ServerShip ship, IComputerSystem remote) {
         this.ship = ship;
+        this.host_system = remote;
     }
 
     @Nullable
@@ -39,26 +43,34 @@ public class ShipAPI implements ILuaAPI {
         return new String[]{"ship"};
     }
 
-    @Override
-    public void startup() {
-        if (this.system == null) return;
+    @LuaFunction
+    public void subscribe_phys() {
         try {
-            PhysicsTicksHandle.getOrCreate(getShip()).subscribe(this.system);
+            PhysicsTicksHandle.getOrCreate(getShip()).subscribe(this.host_system);
         } catch (LuaException luaException) {}
     }
 
+    @LuaFunction
+    public void unsubscribe_phys() {
+        try {
+            PhysicsTicksHandle.getOrCreate(getShip()).unsubscribe(this.host_system);
+        } catch (LuaException luaException) {}
+    }
+
+    @LuaFunction
     @Override
     public void shutdown() {
-        if (this.system == null) return;
         try {
-            PhysicsTicksHandle.getOrCreate(getShip()).unsubscribe(this.system);
+            PhysicsTicksHandle.getOrCreate(getShip()).unsubscribe(this.host_system);
         } catch (LuaException luaException) {}
     }
 
     @NotNull
     protected final ServerShip getShip() throws LuaException {
         if (ship != null) return ship;
-        ServerShip ship = VSGameUtilsKt.getShipObjectManagingPos(this.system.getLevel(), this.system.getPosition());
+        if (ship_system == null)
+            throw new LuaException("This computer is not on a Ship!");
+        ServerShip ship = VSGameUtilsKt.getShipObjectManagingPos(this.ship_system.getLevel(), this.ship_system.getPosition());
         if (ship == null)
             throw new LuaException("This computer is not on a Ship!");
         return ship;
@@ -160,13 +172,13 @@ public class ShipAPI implements ILuaAPI {
 
     @LuaFunction
     public final Map<String, ?> getComputerPosition() throws LuaException {
-        return toLua(this.system.getPosition());
+        return toLua(this.host_system.getPosition());
     }
 
     @LuaFunction
     public final String getComputerFacing() throws LuaException {
-        BlockPos pos = this.system.getPosition();
-        ServerLevel level = this.system.getLevel();
+        BlockPos pos = this.host_system.getPosition();
+        ServerLevel level = this.host_system.getLevel();
         return level.getBlockState(pos).getValue(HorizontalDirectionalBlock.FACING).toString();
     }
 

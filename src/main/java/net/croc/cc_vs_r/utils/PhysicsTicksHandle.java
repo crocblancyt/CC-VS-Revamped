@@ -77,6 +77,7 @@ public class PhysicsTicksHandle implements ShipForcesInducer {
     }
 
     public void unsubscribe(IComputerSystem system) {
+        if (!computers.containsKey(system.hashCode())) return;
         computers.remove(system.hashCode());
     }
 

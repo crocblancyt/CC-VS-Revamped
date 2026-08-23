@@ -5,8 +5,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import net.croc.cc_vs_r.utils.LuaUtils;
+import net.croc.cc_vs_r.utils.PhysicsTicksHandle;
+import org.joml.Vector3d;
+import org.joml.Vector3dc;
 import org.valkyrienskies.core.api.ships.ShipForcesInducer;
 import org.valkyrienskies.core.impl.game.ships.PhysShipImpl;
+import org.valkyrienskies.mod.common.VSGameUtilsKt;
 import org.valkyrienskies.physics_api.PoseVel;
 
 public class PhysShipAPI {
